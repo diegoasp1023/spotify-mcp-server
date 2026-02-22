@@ -6,7 +6,8 @@ const getPlaylist: tool<{
   playlistId: z.ZodString;
 }> = {
   name: 'getPlaylist',
-  description: 'Get details of a specific Spotify playlist including tracks count, description and owner',
+  description:
+    'Get details of a specific Spotify playlist including tracks count, description and owner',
   schema: {
     playlistId: z.string().describe('The Spotify ID of the playlist'),
   },
@@ -18,11 +19,14 @@ const getPlaylist: tool<{
         return await spotifyApi.playlists.getPlaylist(playlistId);
       });
 
-      const owner = playlist.owner?.display_name ?? playlist.owner?.id ?? 'Unknown';
+      const owner =
+        playlist.owner?.display_name ?? playlist.owner?.id ?? 'Unknown';
       const tracksTotal = playlist.tracks?.total ?? 0;
       const isPublic = playlist.public ? 'Public' : 'Private';
       const isCollaborative = playlist.collaborative ? ' | Collaborative' : '';
-      const description = playlist.description ? `\n**Description**: ${playlist.description}` : '';
+      const description = playlist.description
+        ? `\n**Description**: ${playlist.description}`
+        : '';
       const url = playlist.external_urls?.spotify ?? '';
 
       return {
@@ -63,21 +67,41 @@ const updatePlaylist: tool<{
   collaborative: z.ZodOptional<z.ZodBoolean>;
 }> = {
   name: 'updatePlaylist',
-  description: 'Update the details of a Spotify playlist (name, description, public/private, collaborative)',
+  description:
+    'Update the details of a Spotify playlist (name, description, public/private, collaborative)',
   schema: {
     playlistId: z.string().describe('The Spotify ID of the playlist'),
     name: z.string().optional().describe('New name for the playlist'),
-    description: z.string().optional().describe('New description for the playlist'),
-    public: z.boolean().optional().describe('Whether the playlist should be public'),
+    description: z
+      .string()
+      .optional()
+      .describe('New description for the playlist'),
+    public: z
+      .boolean()
+      .optional()
+      .describe('Whether the playlist should be public'),
     collaborative: z
       .boolean()
       .optional()
-      .describe('Whether the playlist should be collaborative (requires public to be false)'),
+      .describe(
+        'Whether the playlist should be collaborative (requires public to be false)',
+      ),
   },
   handler: async (args, _extra: SpotifyHandlerExtra) => {
-    const { playlistId, name, description, public: isPublic, collaborative } = args;
+    const {
+      playlistId,
+      name,
+      description,
+      public: isPublic,
+      collaborative,
+    } = args;
 
-    if (!name && description === undefined && isPublic === undefined && collaborative === undefined) {
+    if (
+      !name &&
+      description === undefined &&
+      isPublic === undefined &&
+      collaborative === undefined
+    ) {
       return {
         content: [
           {
@@ -129,7 +153,8 @@ const removeTracksFromPlaylist: tool<{
   snapshotId: z.ZodOptional<z.ZodString>;
 }> = {
   name: 'removeTracksFromPlaylist',
-  description: 'Remove one or more tracks from a Spotify playlist (max 100 tracks per request)',
+  description:
+    'Remove one or more tracks from a Spotify playlist (max 100 tracks per request)',
   schema: {
     playlistId: z.string().describe('The Spotify ID of the playlist'),
     trackIds: z
@@ -140,7 +165,9 @@ const removeTracksFromPlaylist: tool<{
     snapshotId: z
       .string()
       .optional()
-      .describe('The playlist snapshot ID to target a specific version (optional)'),
+      .describe(
+        'The playlist snapshot ID to target a specific version (optional)',
+      ),
   },
   handler: async (args, _extra: SpotifyHandlerExtra) => {
     const { playlistId, trackIds, snapshotId } = args;
@@ -199,7 +226,9 @@ const reorderPlaylistItems: tool<{
     insertBefore: z
       .number()
       .nonnegative()
-      .describe('The position where the items should be inserted (0-based index)'),
+      .describe(
+        'The position where the items should be inserted (0-based index)',
+      ),
     rangeLength: z
       .number()
       .min(1)
@@ -208,10 +237,13 @@ const reorderPlaylistItems: tool<{
     snapshotId: z
       .string()
       .optional()
-      .describe('The playlist snapshot ID to target a specific version (optional)'),
+      .describe(
+        'The playlist snapshot ID to target a specific version (optional)',
+      ),
   },
   handler: async (args, _extra: SpotifyHandlerExtra) => {
-    const { playlistId, rangeStart, insertBefore, rangeLength, snapshotId } = args;
+    const { playlistId, rangeStart, insertBefore, rangeLength, snapshotId } =
+      args;
 
     try {
       await handleSpotifyRequest(async (spotifyApi) => {
